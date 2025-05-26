@@ -1,406 +1,384 @@
-import React, { useState, useEffect } from 'react';
-import {
-RefreshCw, Shuffle, User, Ruler, PersonStanding, Smile, Shirt, Star,
-Heart, Calendar, Palette, PawPrint, Sparkles,
-Lock, Unlock, Zap // Import Zap icon for Super Power
-} from 'lucide-react';
-
-const CharacterGenerator = () => {
-const [character, setCharacter] = useState({});
-const [animating, setAnimating] = useState({});
-// State to track locked attributes
-const [lockedAttributes, setLockedAttributes] = useState({});
-
-const characterOptions = {
-height: [
-'4\'8"', '4\'9"', '4\'10"', '4\'11"', '5\'0"', '5\'1"', '5\'2"', '5\'3"', '5\'4"', '5\'5"',
-'5\'6"', '5\'7"', '5\'8"', '5\'9"', '5\'10"', '5\'11"', '6\'0"', '6\'1"', '6\'2"', '6\'3"',
-'6\'4"', '6\'5"', '6\'6"', '6\'7"', '6\'8"', '6\'9"', '6\'10"', '6\'11"', '7\'0"'
-],
-bodyType: [
-'Petite', 'Slim', 'Athletic', 'Curvy', 'Muscular', 'Average', 'Stocky', 'Tall & Lanky',
-'Voluptuous', 'Toned', 'Ectomorph', 'Mesomorph', 'Endomorph', 'Hourglass', 'Pear-shaped',
-'Apple-shaped', 'Inverted Triangle', 'Rectangle', 'Lean', 'Robust'
-],
-personality: [
-'Adventurous', 'Mysterious', 'Cheerful', 'Brooding', 'Confident', 'Shy', 'Witty', 'Calm',
-'Energetic', 'Rebellious', 'Kind-hearted', 'Sarcastic', 'Optimistic', 'Pessimistic',
-'Introverted', 'Extroverted', 'Loyal', 'Impulsive', 'Patient', 'Curious', 'Cynical',
-'Dreamy', 'Practical', 'Eccentric', 'Reserved', 'Flamboyant', 'Grumpy', 'Playful',
-'Stoic', 'Charismatic'
-],
-outfit: [
-'Casual Jeans & T-shirt', 'Business Suit', 'Gothic Dress', 'Leather Jacket', 'Sundress',
-'Hoodie & Sweatpants', 'Vintage Style', 'Athletic Wear', 'Bohemian', 'Punk Rock',
-'Elegant Evening Wear', 'Street Style', 'Steampunk Attire', 'Futuristic Jumpsuit',
-'Fantasy Armor', 'Wizard Robes', 'Victorian Gown', 'Cyberpunk Gear', 'Safari Outfit',
-'Sailor Uniform', 'Kimono', 'Space Suit', 'Chef Uniform', 'Artist Smock', 'Lab Coat',
-// Added pinup-style outfits below
-'Bunny Outfit', 'Classic Swimsuit', 'High-waisted Bikini', 'Summer Dress', 'Pinup Lingerie',
-'French Maid Uniform', 'Retro Diner Uniform', 'Cheerleader Outfit', 'Burlesque Costume',
-'Sailor Pinup Dress', 'Leopard Print Dress', 'Polka Dot Dress', 'Bombshell Gown',
-'Tropical Beachwear', 'Roller Derby Outfit'
-],
-trait: [
-'Always humming', 'Collects vintage coins', 'Speaks in movie quotes', 'Never wears matching socks',
-'Has a photographic memory', 'Afraid of butterflies', 'Can juggle anything', 'Talks to plants',
-'Always cold', 'Never forgets a face', 'Laughs at own jokes', 'Counts steps while walking',
-'Obsessed with true crime', 'Can mimic any accent', 'Always carries a sketchbook',
-'Has an imaginary friend', 'Sleepwalks frequently', 'Allergic to sunshine',
-'Gets lost easily', 'Fluent in a dead language', 'Can identify any bird by its song',
-'Compulsively organizes books by color', 'Believes in aliens', 'Has a lucky charm they never remove',
-'Always has a snack', 'Writes poetry in secret', 'Can solve a Rubik\'s Cube in under a minute'
-],
-chestSize: [
-'AA', 'A', 'B', 'C', 'D', 'DD', 'DDD', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'
-],
-age: [
-'18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33',
-'34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50+'
-],
-skinTone: [
-'Pale', 'Fair', 'Light', 'Medium', 'Olive', 'Tan', 'Dark', 'Deep', 'Ebony', 'Porcelain',
-'Golden', 'Bronze', 'Alabaster', 'Rosy', 'Sallow', 'Ashy', 'Mahogany', 'Caramel', 'Sepia',
-'Ivory', 'Beige'
-],
-species: [
-'Human', 'Cat', 'Fox', 'Wolf', 'Rabbit', 'Dragon', 'Elf', 'Vampire', 'Angel', 'Demon',
-'Fairy', 'Witch', 'Dwarf', 'Orc', 'Goblin', 'Merfolk', 'Centaur', 'Minotaur', 'Gnome',
-'Troll', 'Werewolf', 'Zombie', 'Ghost', 'Robot', 'Alien', 'Cyborg', 'Shifter', 'Gargoyle'
-],
-sex: ['Female'],
-// Expanded Super Power category
-superPower: [
-// My Hero Academia inspired
-'One For All (Super Strength & Speed)', 'Explosion (Sweat-based Blasts)', 'Zero Gravity (Touch-based Levitation)',
-'Half-Cold Half-Hot (Ice & Fire Manipulation)', 'Erasure (Quirk Nullification)', 'Dark Shadow (Sentient Shadow Being)',
-'Fierce Wings (Flight & Feather Projectiles)', 'Acid (Corrosive Secretion)', 'Electrification (Electric Discharge)',
-// One Punch Man inspired
-'Serious Punch (Overwhelming Strength)', 'Consecutive Normal Punches (Rapid Strikes)', 'King Engine (Intimidating Aura)',
-'Atomic Slash (Supersonic Sword Skills)', 'Genos Incinerate (Energy Blasts)', 'Sonic Speed (Super Speed)',
-// DC inspired
-'Flight (Self-propelled Aerial Movement)', 'Super Strength (Enhanced Physical Power)', 'Invulnerability (Damage Immunity)',
-'Heat Vision (Eye-emitted Energy Beams)', 'Telekinesis (Mind-based Object Manipulation)', 'Super Speed (Faster-than-light Movement)',
-'Invisibility (Concealment from Sight)', 'Telepathy (Mind Reading & Communication)', 'Force Fields (Energy Barrier Creation)',
-'Shapeshifting (Form Alteration)', 'Hydrokinesis (Water Control)', 'Cryokinesis (Ice Manipulation)',
-'Pyrokinesis (Fire Manipulation)', 'Technopathy (Technology Control)', 'Empathy (Emotion Sensing)',
-'Healing Factor (Rapid Regeneration)', 'Intangibility (Phase Through Objects)', 'Time Manipulation (Slow/Stop Time)',
-// Marvel inspired
-'Adamantium Claws (Retractable Claws & Healing)', 'Web-Slinging (Adhesive Web Projection)', 'Gamma Radiation Absorption (Strength & Durability)',
-'Vibranium Shield Mastery (Deflection & Attack)', 'Energy Blasts (Repulsor Rays)', 'Teleportation (Instantaneous Travel)',
-'Reality Warping (Alteration of Reality)', 'Weather Manipulation (Storm Control)', 'Astral Projection (Spirit Separation)',
-'Elasticity (Body Stretching)', 'Size Manipulation (Grow/Shrink)', 'Vampirism (Blood Sucking & Immortality)',
-'Enhanced Senses (Heightened Perception)', 'Sonic Scream (Devastating Vocal Blast)', 'Chlorokinesis (Plant Control)',
-'Geokinesis (Earth Manipulation)', 'Photokinesis (Light Manipulation)', 'Umbrakinesis (Shadow Manipulation)',
-'Magnetism (Magnetic Field Control)', 'Precognition (Future Sight)', 'Retrocognition (Past Sight)',
-// Creative, Eldritch, Mysterious, and more
-'Pocket Dimension Creation (Summon small, personal spaces)', 'Dream Manipulation (Control/Enter others\' dreams)',
-'Soul Absorption (Drain life force for power)', 'Chronomancy (Minor Time Rewind/Forward)',
-'Aura Manipulation (Control personal energy field)', 'Echo Location (Sonar-like perception)',
-'Psionic Blasts (Mental energy attacks)', 'Glamour (Illusion casting for appearance)',
-'Voodoo Doll Creation (Harm others via effigies)', 'Shadow Travel (Teleport through shadows)',
-'Elemental Infusion (Imbue self/objects with elements)', 'Gravity Manipulation (Alter local gravity)',
-'Probability Manipulation (Influence luck/chance)', 'Mimicry (Copy abilities temporarily)',
-'Symbiotic Bond (Partner with a powerful entity)', 'Reality Anchoring (Resist reality warping)',
-'Void Gaze (Induce fear/despair with eye contact)', 'Eldritch Tentacles (Manifest otherworldly limbs)',
-'Whispers of Madness (Inflict insanity through voice)', 'Cosmic Awareness (Limited knowledge of universe)',
-'Quantum Entanglement (Link objects/people across space)', 'Temporal Loop Creation (Trap targets in time loops)',
-'Emotional Resonance (Amplify/Suppress emotions)', 'Biomancy (Control biological processes)',
-'Necromancy (Communicate with/raise dead)', 'Astral Combat (Fight on the astral plane)',
-'Techno-Empathy (Communicate with machines)', 'Memory Manipulation (Alter/Erase memories)',
-'Pain Transfer (Transfer pain to another)', 'Life Drain (Absorb life force from living beings)',
-'Death Touch (Inflict rapid decay on contact)', 'Energy Nullification (Cancel out other powers)',
-'Warp Reality (Minor reality bending)', 'Summoning (Call forth creatures/objects)',
-'Barrier Generation (Create protective shields)', 'Vibration Manipulation (Control molecular vibrations)',
-'Adaptation (Evolve to overcome threats)', 'Teleportation Sickness (Induce nausea in teleported foes)',
-'Aetherial Form (Become incorporeal)', 'Runesmithing (Inscribe magical effects)',
-'Geomancy (Sense and manipulate earth energies)', 'Weather Seeding (Influence local weather patterns)',
-'Animal Communication (Talk to animals)', 'Object Animation (Bring inanimate objects to life)',
-'Psychometry (Read history of objects through touch)', 'Kinetic Absorption (Absorb kinetic energy)',
-'Vortex Creation (Generate destructive whirlwinds)', 'Vaporization (Disintegrate objects)',
-'Hypnosis (Control minds through suggestion)', 'Fear Inducement (Project overwhelming fear)',
-'Light Bending (Manipulate light for invisibility/blinding)', 'Sound Manipulation (Control sound waves)',
-'Plant Growth Acceleration (Rapidly grow plants)', 'Molecular Combustion (Cause objects to explode)',
-'Prehensile Hair (Control hair as extra limbs)', 'Regenerative Shedding (Shed skin to heal/transform)',
-'Vibration Sense (Perceive surroundings through vibrations)', 'Corrosion Touch (Cause rapid decay on contact)',
-'Aura Reading (Perceive emotional/health auras)'
-]
-};
-
-const getRandomValue = (array) => {
-return array[Math.floor(Math.random() * array.length)];
-};
-
-const generateRandomCharacter = () => {
-const newCharacter = {};
-Object.keys(characterOptions).forEach(key => {
-newCharacter[key] = getRandomValue(characterOptions[key]);
-});
-return newCharacter;
-};
-
-const rollSingle = (attribute) => {
-setAnimating(prev => ({ ...prev, [attribute]: true }));
-
-setTimeout(() => {
-setCharacter(prev => ({
-...prev,
-[attribute]: getRandomValue(characterOptions[attribute])
-}));
-
-setTimeout(() => {
-setAnimating(prev => ({ ...prev, [attribute]: false }));
-}, 150);
-}, 200);
-};
-
-const rollAll = () => {
-const newCharacter = { ...character }; // Start with current character
-const allKeys = Object.keys(characterOptions);
-
-allKeys.forEach(key => {
-// Only animate and reroll if the attribute is NOT locked
-if (!lockedAttributes[key]) {
-setAnimating(prev => ({ ...prev, [key]: true }));
-newCharacter[key] = getRandomValue(characterOptions[key]);
-}
-});
-
-setTimeout(() => {
-setCharacter(newCharacter); // Set the new character state
-
-setTimeout(() => {
-const resetAnimating = {};
-allKeys.forEach(key => {
-resetAnimating[key] = false; // Reset animation for all, even locked ones (they weren't animated anyway)
-});
-setAnimating(resetAnimating);
-}, 150);
-}, 200);
-};
-
-// Function to toggle lock state for an attribute
-const toggleLock = (attribute) => {
-setLockedAttributes(prev => ({
-...prev,
-[attribute]: !prev[attribute] // Toggle the boolean value
-}));
-};
-
-useEffect(() => {
-const initialCharacter = generateRandomCharacter();
-setCharacter(initialCharacter);
-// Initialize all attributes as unlocked
-const initialLocks = {};
-Object.keys(characterOptions).forEach(key => {
-initialLocks[key] = false;
-});
-setLockedAttributes(initialLocks);
-}, []);
-
-// Map of attribute titles to their corresponding Lucide React icons
-const attributeIcons = {
-"Height":
-<Ruler size={16} className="text-teal-400" />,
-"Body Type":
-<PersonStanding size={16} className="text-teal-400" />,
-"Personality":
-<Smile size={16} className="text-teal-400" />,
-"Outfit":
-<Shirt size={16} className="text-teal-400" />,
-"Special Trait":
-<Star size={16} className="text-teal-400" />,
-"Chest Size":
-<Heart size={16} className="text-teal-400" />,
-"Age":
-<Calendar size={16} className="text-teal-400" />,
-"Skin Tone":
-<Palette size={16} className="text-teal-400" />,
-"Species":
-<PawPrint size={16} className="text-teal-400" />,
-"Sex":
-<User size={16} className="text-teal-400" />,
-"Super Power":
-<Zap size={16} className="text-teal-400" />, // Icon for Super Power
-};
-
-const AttributeCard = ({ title, value, onRoll, isAnimating, isLocked, onToggleLock }) => (
-<div className={`bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border transition-all duration-300 ${isLocked ? 'border-amber-400/50 shadow-lg shadow-amber-500/10' : 'border-purple-500/20 hover:border-teal-400/40 hover:shadow-lg hover:shadow-purple-500/10' }`}>
-  <div className="flex justify-between items-start mb-3">
-    <h3 className="text-teal-300 font-semibold text-sm uppercase tracking-wider flex items-center gap-2">
-      {attributeIcons[title]}
-      {title}
-    </h3>
-    <div className="flex gap-2">
-      {/* Lock Button */}
-      <button onClick={onToggleLock} className="p-1.5 rounded-lg bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 transition-all duration-200 hover:scale-110 active:scale-95" title={isLocked ? "Unlock" : "Lock" }>
-        {isLocked ? (
-        <Lock size={14} className="text-amber-300" />
-        ) : (
-        <Unlock size={14} className="text-slate-300" />
-        )}
-      </button>
-      {/* Reroll Single Button */}
-      <button onClick={onRoll} className="p-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-500 hover:to-teal-500 transition-all duration-200 hover:scale-110 active:scale-95" disabled={isAnimating}>
-        <RefreshCw size={14} className={`text-white ${isAnimating ? 'animate-spin' : '' }`} />
-      </button>
-    </div>
-  </div>
-  <div className={`text-white font-medium text-lg transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100' }`}>
-    {value || '...'}
-  </div>
-</div>
-);
-
-return (
-<div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 p-4 flex flex-col font-exo2">
-  <style>
-    {
-      ` @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
-
-      .font-exo2 {
-        font-family: 'Exo 2', sans-serif;
-      }
-
-      .fade-out {
-        opacity: 0;
-        transition: opacity 0.3s ease-out;
-      }
-
-      .fade-in-with-glow {
-        animation: fade-in-with-glow-animation 0.4s ease-out forwards;
-      }
-
-      @keyframes fade-in-with-glow-animation {
-        0% {
-          opacity: 0;
-          transform: scale(1);
-          text-shadow: none;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Core Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .font-exo2 {
+            font-family: 'Exo 2', sans-serif;
         }
-
-        50% {
-          opacity: 1;
-          transform: scale(1);
-          text-shadow: 0 0 8px var(--glow-color), 0 0 15px var(--glow-color), 0 0 25px var(--glow-color);
+        .fade-out {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
         }
-
-        100% {
-          opacity: 1;
-          transform: scale(1);
-          text-shadow: none;
+        .fade-in-with-glow {
+            animation: fade-in-with-glow-animation 0.4s ease-out forwards;
         }
-      }
+        @keyframes fade-in-with-glow-animation {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+                text-shadow: none;
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+                text-shadow: 0 0 8px var(--glow-color), 0 0 15px var(--glow-color), 0 0 25px var(--glow-color);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                text-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-      `
-    }
-  </style>
+    <script type="module">
+        import React, { useState, useEffect } from 'react';
+        import ReactDOM from 'react-dom/client';
+        import {
+            RefreshCw, Shuffle, User, Ruler, PersonStanding, Smile, Shirt, Star,
+            Heart, Calendar, Palette, PawPrint, Sparkles,
+            Lock, Unlock, Zap
+        } from 'lucide-react';
 
-  {/* Header */}
-  <div className="text-center mb-8">
-    <div className="flex items-center justify-center gap-3 mb-4">
-      <Sparkles className="text-white" size={32} />
-      <h1 className="text-4xl md:text-5xl font-bold text-white leading-none"> {/* Changed text-transparent to text-white */}
-        Character Core Generator <span className="bg-gradient-to-r from-purple-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">v3</span> {/* Applied gradient to v3 */}
-      </h1>
-    </div>
-    <p className="text-slate-400 text-lg">Create unique characters with the click of a button</p>
-  </div>
+        const CharacterGenerator = () => {
+            const [character, setCharacter] = useState({});
+            const [animating, setAnimating] = useState({});
+            const [lockedAttributes, setLockedAttributes] = useState({});
 
-  {/* Character Grid */}
-  <div className="flex-1 max-w-6xl mx-auto w-full">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-      <AttributeCard title="Height" value={character.height} onRoll={()=> rollSingle('height')}
-        isAnimating={animating.height}
-        isLocked={lockedAttributes.height}
-        onToggleLock={() => toggleLock('height')}
-        />
-        <AttributeCard title="Body Type" value={character.bodyType} onRoll={()=> rollSingle('bodyType')}
-          isAnimating={animating.bodyType}
-          isLocked={lockedAttributes.bodyType}
-          onToggleLock={() => toggleLock('bodyType')}
-          />
-          <AttributeCard title="Personality" value={character.personality} onRoll={()=> rollSingle('personality')}
-            isAnimating={animating.personality}
-            isLocked={lockedAttributes.personality}
-            onToggleLock={() => toggleLock('personality')}
-            />
-            <AttributeCard title="Outfit" value={character.outfit} onRoll={()=> rollSingle('outfit')}
-              isAnimating={animating.outfit}
-              isLocked={lockedAttributes.outfit}
-              onToggleLock={() => toggleLock('outfit')}
-              />
-              <AttributeCard title="Special Trait" value={character.trait} onRoll={()=> rollSingle('trait')}
-                isAnimating={animating.trait}
-                isLocked={lockedAttributes.trait}
-                onToggleLock={() => toggleLock('trait')}
-                />
-                <AttributeCard title="Chest Size" value={character.chestSize} onRoll={()=> rollSingle('chestSize')}
-                  isAnimating={animating.chestSize}
-                  isLocked={lockedAttributes.chestSize}
-                  onToggleLock={() => toggleLock('chestSize')}
-                  />
-                  <AttributeCard title="Age" value={character.age} onRoll={()=> rollSingle('age')}
-                    isAnimating={animating.age}
-                    isLocked={lockedAttributes.age}
-                    onToggleLock={() => toggleLock('age')}
-                    />
-                    <AttributeCard title="Skin Tone" value={character.skinTone} onRoll={()=> rollSingle('skinTone')}
-                      isAnimating={animating.skinTone}
-                      isLocked={lockedAttributes.skinTone}
-                      onToggleLock={() => toggleLock('skinTone')}
-                      />
-                      <AttributeCard title="Species" value={character.species} onRoll={()=> rollSingle('species')}
-                        isAnimating={animating.species}
-                        isLocked={lockedAttributes.species}
-                        onToggleLock={() => toggleLock('species')}
-                        />
-                        {/* Sex card is always locked as per your requirement */}
-                        <AttributeCard title="Sex" value={character.sex} onRoll={()=> rollSingle('sex')} // Still allows individual roll, but it's fixed to 'Female'
-                          isAnimating={animating.sex}
-                          isLocked={true} // Always locked
-                          onToggleLock={() => {}} // No toggle function for sex
-                          />
-                          {/* New Super Power Card */}
-                          <AttributeCard title="Super Power" value={character.superPower} onRoll={()=> rollSingle('superPower')}
-                            isAnimating={animating.superPower}
-                            isLocked={lockedAttributes.superPower}
-                            onToggleLock={() => toggleLock('superPower')}
-                            />
-    </div>
+            const characterOptions = {
+                height: [
+                    '4\'8"', '4\'9"', '4\'10"', '4\'11"', '5\'0"', '5\'1"', '5\'2"', '5\'3"', '5\'4"', '5\'5"',
+                    '5\'6"', '5\'7"', '5\'8"', '5\'9"', '5\'10"', '5\'11"', '6\'0"', '6\'1"', '6\'2"', '6\'3"',
+                    '6\'4"', '6\'5"', '6\'6"', '6\'7"', '6\'8"', '6\'9"', '6\'10"', '6\'11"', '7\'0"'
+                ],
+                bodyType: [
+                    'Petite', 'Slim', 'Athletic', 'Curvy', 'Muscular', 'Average', 'Stocky', 'Tall & Lanky',
+                    'Voluptuous', 'Toned', 'Ectomorph', 'Mesomorph', 'Endomorph', 'Hourglass', 'Pear-shaped',
+                    'Apple-shaped', 'Inverted Triangle', 'Rectangle', 'Lean', 'Robust'
+                ],
+                personality: [
+                    'Adventurous', 'Mysterious', 'Cheerful', 'Brooding', 'Confident', 'Shy', 'Witty', 'Calm',
+                    'Energetic', 'Rebellious', 'Kind-hearted', 'Sarcastic', 'Optimistic', 'Pessimistic',
+                    'Introverted', 'Extroverted', 'Loyal', 'Impulsive', 'Patient', 'Curious', 'Cynical',
+                    'Dreamy', 'Practical', 'Eccentric', 'Reserved', 'Flamboyant', 'Grumpy', 'Playful',
+                    'Stoic', 'Charismatic'
+                ],
+                outfit: [
+                    'Casual Jeans & T-shirt', 'Business Suit', 'Gothic Dress', 'Leather Jacket', 'Sundress',
+                    'Hoodie & Sweatpants', 'Vintage Style', 'Athletic Wear', 'Bohemian', 'Punk Rock',
+                    'Elegant Evening Wear', 'Street Style', 'Steampunk Attire', 'Futuristic Jumpsuit',
+                    'Fantasy Armor', 'Wizard Robes', 'Victorian Gown', 'Cyberpunk Gear', 'Safari Outfit',
+                    'Sailor Uniform', 'Kimono', 'Space Suit', 'Chef Uniform', 'Artist Smock', 'Lab Coat',
+                    'Bunny Outfit', 'Classic Swimsuit', 'High-waisted Bikini', 'Summer Dress', 'Pinup Lingerie',
+                    'French Maid Uniform', 'Retro Diner Uniform', 'Cheerleader Outfit', 'Burlesque Costume',
+                    'Sailor Pinup Dress', 'Leopard Print Dress', 'Polka Dot Dress', 'Bombshell Gown',
+                    'Tropical Beachwear', 'Roller Derby Outfit'
+                ],
+                trait: [
+                    'Always humming', 'Collects vintage coins', 'Speaks in movie quotes', 'Never wears matching socks',
+                    'Has a photographic memory', 'Afraid of butterflies', 'Can juggle anything', 'Talks to plants',
+                    'Always cold', 'Never forgets a face', 'Laughs at own jokes', 'Counts steps while walking',
+                    'Obsessed with true crime', 'Can mimic any accent', 'Always carries a sketchbook',
+                    'Has an imaginary friend', 'Sleepwalks frequently', 'Allergic to sunshine',
+                    'Gets lost easily', 'Fluent in a dead language', 'Can identify any bird by its song',
+                    'Compulsively organizes books by color', 'Believes in aliens', 'Has a lucky charm they never remove',
+                    'Always has a snack', 'Writes poetry in secret', 'Can solve a Rubik\'s Cube in under a minute'
+                ],
+                chestSize: [
+                    'AA', 'A', 'B', 'C', 'D', 'DD', 'DDD', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'
+                ],
+                age: [
+                    '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33',
+                    '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50+'
+                ],
+                skinTone: [
+                    'Pale', 'Fair', 'Light', 'Medium', 'Olive', 'Tan', 'Dark', 'Deep', 'Ebony', 'Porcelain',
+                    'Golden', 'Bronze', 'Alabaster', 'Rosy', 'Sallow', 'Ashy', 'Mahogany', 'Caramel', 'Sepia',
+                    'Ivory', 'Beige'
+                ],
+                species: [
+                    'Human', 'Cat', 'Fox', 'Wolf', 'Rabbit', 'Dragon', 'Elf', 'Vampire', 'Angel', 'Demon',
+                    'Fairy', 'Witch', 'Dwarf', 'Orc', 'Goblin', 'Merfolk', 'Centaur', 'Minotaur', 'Gnome',
+                    'Troll', 'Werewolf', 'Zombie', 'Ghost', 'Robot', 'Alien', 'Cyborg', 'Shifter', 'Gargoyle'
+                ],
+                sex: ['Female'],
+                superPower: [
+                    'One For All (Super Strength & Speed)', 'Explosion (Sweat-based Blasts)', 'Zero Gravity (Touch-based Levitation)',
+                    'Half-Cold Half-Hot (Ice & Fire Manipulation)', 'Erasure (Quirk Nullification)', 'Dark Shadow (Sentient Shadow Being)',
+                    'Fierce Wings (Flight & Feather Projectiles)', 'Acid (Corrosive Secretion)', 'Electrification (Electric Discharge)',
+                    'Serious Punch (Overwhelming Strength)', 'Consecutive Normal Punches (Rapid Strikes)', 'King Engine (Intimidating Aura)',
+                    'Atomic Slash (Supersonic Sword Skills)', 'Genos Incinerate (Energy Blasts)', 'Sonic Speed (Super Speed)',
+                    'Flight (Self-propelled Aerial Movement)', 'Super Strength (Enhanced Physical Power)', 'Invulnerability (Damage Immunity)',
+                    'Heat Vision (Eye-emitted Energy Beams)', 'Telekinesis (Mind-based Object Manipulation)', 'Super Speed (Faster-than-light Movement)',
+                    'Invisibility (Concealment from Sight)', 'Telepathy (Mind Reading & Communication)', 'Force Fields (Energy Barrier Creation)',
+                    'Shapeshifting (Form Alteration)', 'Hydrokinesis (Water Control)', 'Cryokinesis (Ice Manipulation)',
+                    'Pyrokinesis (Fire Manipulation)', 'Technopathy (Technology Control)', 'Empathy (Emotion Sensing)',
+                    'Healing Factor (Rapid Regeneration)', 'Intangibility (Phase Through Objects)', 'Time Manipulation (Slow/Stop Time)',
+                    'Adamantium Claws (Retractable Claws & Healing)', 'Web-Slinging (Adhesive Web Projection)', 'Gamma Radiation Absorption (Strength & Durability)',
+                    'Vibranium Shield Mastery (Deflection & Attack)', 'Energy Blasts (Repulsor Rays)', 'Teleportation (Instantaneous Travel)',
+                    'Reality Warping (Alteration of Reality)', 'Weather Manipulation (Storm Control)', 'Astral Projection (Spirit Separation)',
+                    'Elasticity (Body Stretching)', 'Size Manipulation (Grow/Shrink)', 'Vampirism (Blood Sucking & Immortality)',
+                    'Enhanced Senses (Heightened Perception)', 'Sonic Scream (Devastating Vocal Blast)', 'Chlorokinesis (Plant Control)',
+                    'Geokinesis (Earth Manipulation)', 'Photokinesis (Light Manipulation)', 'Umbrakinesis (Shadow Manipulation)',
+                    'Magnetism (Magnetic Field Control)', 'Precognition (Future Sight)', 'Retrocognition (Past Sight)',
+                    'Pocket Dimension Creation (Summon small, personal spaces)', 'Dream Manipulation (Control/Enter others\' dreams)',
+                    'Soul Absorption (Drain life force for power)', 'Chronomancy (Minor Time Rewind/Forward)',
+                    'Aura Manipulation (Control personal energy field)', 'Echo Location (Sonar-like perception)',
+                    'Psionic Blasts (Mental energy attacks)', 'Glamour (Illusion casting for appearance)',
+                    'Voodoo Doll Creation (Harm others via effigies)', 'Shadow Travel (Teleport through shadows)',
+                    'Elemental Infusion (Imbue self/objects with elements)', 'Gravity Manipulation (Alter local gravity)',
+                    'Probability Manipulation (Influence luck/chance)', 'Mimicry (Copy abilities temporarily)',
+                    'Symbiotic Bond (Partner with a powerful entity)', 'Reality Anchoring (Resist reality warping)',
+                    'Void Gaze (Induce fear/despair with eye contact)', 'Eldritch Tentacles (Manifest otherworldly limbs)',
+                    'Whispers of Madness (Inflict insanity through voice)', 'Cosmic Awareness (Limited knowledge of universe)',
+                    'Quantum Entanglement (Link objects/people across space)', 'Temporal Loop Creation (Trap targets in time loops)',
+                    'Emotional Resonance (Amplify/Suppress emotions)', 'Biomancy (Control biological processes)',
+                    'Necromancy (Communicate with/raise dead)', 'Astral Combat (Fight on the astral plane)',
+                    'Techno-Empathy (Communicate with machines)', 'Memory Manipulation (Alter/Erase memories)',
+                    'Pain Transfer (Transfer pain to another)', 'Life Drain (Absorb life force from living beings)',
+                    'Death Touch (Inflict rapid decay on contact)', 'Energy Nullification (Cancel out other powers)',
+                    'Warp Reality (Minor reality bending)', 'Summoning (Call forth creatures/objects)',
+                    'Barrier Generation (Create protective shields)', 'Vibration Manipulation (Control molecular vibrations)',
+                    'Adaptation (Evolve to overcome threats)', 'Teleportation Sickness (Induce nausea in teleported foes)',
+                    'Aetherial Form (Become incorporeal)', 'Runesmithing (Inscribe magical effects)',
+                    'Geomancy (Sense and manipulate earth energies)', 'Weather Seeding (Influence local weather patterns)',
+                    'Animal Communication (Talk to animals)', 'Object Animation (Bring inanimate objects to life)',
+                    'Psychometry (Read history of objects through touch)', 'Kinetic Absorption (Absorb kinetic energy)',
+                    'Vortex Creation (Generate destructive whirlwinds)', 'Vaporization (Disintegrate objects)',
+                    'Hypnosis (Control minds through suggestion)', 'Fear Inducement (Project overwhelming fear)',
+                    'Light Bending (Manipulate light for invisibility/blinding)', 'Sound Manipulation (Control sound waves)',
+                    'Plant Growth Acceleration (Rapidly grow plants)', 'Molecular Combustion (Cause objects to explode)',
+                    'Prehensile Hair (Control hair as extra limbs)', 'Regenerative Shedding (Shed skin to heal/transform)',
+                    'Vibration Sense (Perceive surroundings through vibrations)', 'Corrosion Touch (Cause rapid decay on contact)',
+                    'Aura Reading (Perceive emotional/health auras)'
+                ]
+            };
 
-    {/* Reroll All Button */}
-    <div className="text-center">
-      <button onClick={rollAll} className="px-8 py-4 bg-gradient-to-r from-purple-600 via-cyan-600 to-blue-600 hover:from-purple-500 hover:via-cyan-500 hover:to-blue-500 rounded-xl font-bold text-white text-lg shadow-2xl hover:shadow-cyan-500/25 transition-all duration-300 hover:scale-105 active:scale-95 border border-cyan-400/30">
-        <div className="flex items-center gap-3">
-          <Shuffle size={20} />
-          <span>Reroll Unlocked!</span>
-        </div>
-      </button>
-    </div>
-  </div>
+            const getRandomValue = (array) => {
+                return array[Math.floor(Math.random() * array.length)];
+            };
 
-  {/* Character Summary */}
-  <div className="mt-8 max-w-4xl mx-auto w-full">
-    <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
-      <h2 className="text-2xl font-bold text-teal-300 mb-4 text-center">Your Character</h2>
-      <div className="text-slate-300 text-center leading-relaxed mb-6">
-        <p className="text-lg">
-          Meet your <span className="text-teal-400 font-semibold">{character.age}-year-old {character.sex} {character.species}</span> with{' '}
-          <span className="text-purple-400 font-semibold">{character.skinTone}</span> skin, standing{' '}
-          <span className="text-cyan-400 font-semibold">{character.height}</span> tall with a{' '}
-          <span className="text-teal-400 font-semibold">{character.bodyType}</span> build.
-        </p>
-        <p className="text-lg mt-2">
-          They have a <span className="text-purple-400 font-semibold">{character.personality}</span> personality, dress in{' '}
-          <span className="text-cyan-400 font-semibold">{character.outfit}</span>, and{' '}
-          <span className="text-teal-400 font-semibold">{character.trait}</span>. Their power is{' '}
-          <span className="text-yellow-400 font-semibold">{character.superPower}</span>. {/* Added Super Power to summary */}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-);
-};
+            const generateRandomCharacter = () => {
+                const newCharacter = {};
+                Object.keys(characterOptions).forEach(key => {
+                    newCharacter[key] = getRandomValue(characterOptions[key]);
+                });
+                return newCharacter;
+            };
 
-export default CharacterGenerator;
+            const rollSingle = (attribute) => {
+                setAnimating(prev => ({ ...prev, [attribute]: true }));
+
+                setTimeout(() => {
+                    setCharacter(prev => ({
+                        ...prev,
+                        [attribute]: getRandomValue(characterOptions[attribute])
+                    }));
+
+                    setTimeout(() => {
+                        setAnimating(prev => ({ ...prev, [attribute]: false }));
+                    }, 150);
+                }, 200);
+            };
+
+            const rollAll = () => {
+                const newCharacter = { ...character };
+                const allKeys = Object.keys(characterOptions);
+
+                allKeys.forEach(key => {
+                    if (!lockedAttributes[key]) {
+                        setAnimating(prev => ({ ...prev, [key]: true }));
+                        newCharacter[key] = getRandomValue(characterOptions[key]);
+                    }
+                });
+
+                setTimeout(() => {
+                    setCharacter(newCharacter);
+
+                    setTimeout(() => {
+                        const resetAnimating = {};
+                        allKeys.forEach(key => {
+                            resetAnimating[key] = false;
+                        });
+                        setAnimating(resetAnimating);
+                    }, 150);
+                }, 200);
+            };
+
+            const toggleLock = (attribute) => {
+                setLockedAttributes(prev => ({
+                    ...prev,
+                    [attribute]: !prev[attribute]
+                }));
+            };
+
+            useEffect(() => {
+                const initialCharacter = generateRandomCharacter();
+                setCharacter(initialCharacter);
+                const initialLocks = {};
+                Object.keys(characterOptions).forEach(key => {
+                    initialLocks[key] = false;
+                });
+                setLockedAttributes(initialLocks);
+            }, []);
+
+            const attributeIcons = {
+                "Height": <Ruler size={16} className="text-teal-400" />,
+                "Body Type": <PersonStanding size={16} className="text-teal-400" />,
+                "Personality": <Smile size={16} className="text-teal-400" />,
+                "Outfit": <Shirt size={16} className="text-teal-400" />,
+                "Special Trait": <Star size={16} className="text-teal-400" />,
+                "Chest Size": <Heart size={16} className="text-teal-400" />,
+                "Age": <Calendar size={16} className="text-teal-400" />,
+                "Skin Tone": <Palette size={16} className="text-teal-400" />,
+                "Species": <PawPrint size={16} className="text-teal-400" />,
+                "Sex": <User size={16} className="text-teal-400" />,
+                "Super Power": <Zap size={16} className="text-teal-400" />,
+            };
+
+            const AttributeCard = ({ title, value, onRoll, isAnimating, isLocked, onToggleLock }) => (
+                <div className={`bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border transition-all duration-300 ${isLocked ? 'border-amber-400/50 shadow-lg shadow-amber-500/10' : 'border-purple-500/20 hover:border-teal-400/40 hover:shadow-lg hover:shadow-purple-500/10' }`}>
+                    <div className="flex justify-between items-start mb-3">
+                        <h3 className="text-teal-300 font-semibold text-sm uppercase tracking-wider flex items-center gap-2">
+                            {attributeIcons[title]}
+                            {title}
+                        </h3>
+                        <div className="flex gap-2">
+                            <button onClick={onToggleLock} className="p-1.5 rounded-lg bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 transition-all duration-200 hover:scale-110 active:scale-95" title={isLocked ? "Unlock" : "Lock" }>
+                                {isLocked ? (
+                                <Lock size={14} className="text-amber-300" />
+                                ) : (
+                                <Unlock size={14} className="text-slate-300" />
+                                )}
+                            </button>
+                            <button onClick={onRoll} className="p-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-500 hover:to-teal-500 transition-all duration-200 hover:scale-110 active:scale-95" disabled={isAnimating || isLocked}>
+                                <RefreshCw size={14} className={`text-white ${isAnimating ? 'animate-spin' : '' }`} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className={`text-white font-medium text-lg transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100' }`}>
+                        {value || '...'}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 p-4 flex flex-col font-exo2">
+                    <div className="text-center mb-8">
+                        <div className="flex items-center justify-center gap-3 mb-4">
+                            <Sparkles className="text-white" size={32} />
+                            <h1 className="text-4xl md:text-5xl font-bold text-white leading-none">
+                                Character Core Generator <span className="bg-gradient-to-r from-purple-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">v3</span>
+                            </h1>
+                        </div>
+                        <p className="text-slate-400 text-lg">Create unique characters with the click of a button</p>
+                    </div>
+
+                    <div className="flex-1 max-w-6xl mx-auto w-full">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                            <AttributeCard title="Height" value={character.height} onRoll={()=> rollSingle('height')}
+                                isAnimating={animating.height}
+                                isLocked={lockedAttributes.height}
+                                onToggleLock={() => toggleLock('height')}
+                                />
+                            <AttributeCard title="Body Type" value={character.bodyType} onRoll={()=> rollSingle('bodyType')}
+                                isAnimating={animating.bodyType}
+                                isLocked={lockedAttributes.bodyType}
+                                onToggleLock={() => toggleLock('bodyType')}
+                                />
+                            <AttributeCard title="Personality" value={character.personality} onRoll={()=> rollSingle('personality')}
+                                isAnimating={animating.personality}
+                                isLocked={lockedAttributes.personality}
+                                onToggleLock={() => toggleLock('personality')}
+                                />
+                            <AttributeCard title="Outfit" value={character.outfit} onRoll={()=> rollSingle('outfit')}
+                                isAnimating={animating.outfit}
+                                isLocked={lockedAttributes.outfit}
+                                onToggleLock={() => toggleLock('outfit')}
+                                />
+                            <AttributeCard title="Special Trait" value={character.trait} onRoll={()=> rollSingle('trait')}
+                                isAnimating={animating.trait}
+                                isLocked={lockedAttributes.trait}
+                                onToggleLock={() => toggleLock('trait')}
+                                />
+                            <AttributeCard title="Chest Size" value={character.chestSize} onRoll={()=> rollSingle('chestSize')}
+                                isAnimating={animating.chestSize}
+                                isLocked={lockedAttributes.chestSize}
+                                onToggleLock={() => toggleLock('chestSize')}
+                                />
+                            <AttributeCard title="Age" value={character.age} onRoll={()=> rollSingle('age')}
+                                isAnimating={animating.age}
+                                isLocked={lockedAttributes.age}
+                                onToggleLock={() => toggleLock('age')}
+                                />
+                            <AttributeCard title="Skin Tone" value={character.skinTone} onRoll={()=> rollSingle('skinTone')}
+                                isAnimating={animating.skinTone}
+                                isLocked={lockedAttributes.skinTone}
+                                onToggleLock={() => toggleLock('skinTone')}
+                                />
+                            <AttributeCard title="Species" value={character.species} onRoll={()=> rollSingle('species')}
+                                isAnimating={animating.species}
+                                isLocked={lockedAttributes.species}
+                                onToggleLock={() => toggleLock('species')}
+                                />
+                            <AttributeCard title="Sex" value={character.sex} onRoll={()=> rollSingle('sex')}
+                                isAnimating={animating.sex}
+                                isLocked={true}
+                                onToggleLock={() => {}}
+                                />
+                            <AttributeCard title="Super Power" value={character.superPower} onRoll={()=> rollSingle('superPower')}
+                                isAnimating={animating.superPower}
+                                isLocked={lockedAttributes.superPower}
+                                onToggleLock={() => toggleLock('superPower')}
+                                />
+                        </div>
+
+                        <div className="text-center">
+                            <button onClick={rollAll} className="px-8 py-4 bg-gradient-to-r from-purple-600 via-cyan-600 to-blue-600 hover:from-purple-500 hover:via-cyan-500 hover:to-blue-500 rounded-xl font-bold text-white text-lg shadow-2xl hover:shadow-cyan-500/25 transition-all duration-300 hover:scale-105 active:scale-95 border border-cyan-400/30">
+                                <div className="flex items-center gap-3">
+                                    <Shuffle size={20} />
+                                    <span>Reroll Unlocked!</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 max-w-4xl mx-auto w-full">
+                        <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
+                            <h2 className="text-2xl font-bold text-teal-300 mb-4 text-center">Your Character</h2>
+                            <div className="text-slate-300 text-center leading-relaxed mb-6">
+                                <p className="text-lg">
+                                    Meet your <span className="text-teal-400 font-semibold">{character.age}-year-old {character.sex} {character.species}</span> with{' '}
+                                    <span className="text-purple-400 font-semibold">{character.skinTone}</span> skin, standing{' '}
+                                    <span className="text-cyan-400 font-semibold">{character.height}</span> tall with a{' '}
+                                    <span className="text-teal-400 font-semibold">{character.bodyType}</span> build.
+                                </p>
+                                <p className="text-lg mt-2">
+                                    They have a <span className="text-purple-400 font-semibold">{character.personality}</span> personality, dress in{' '}
+                                    <span className="text-cyan-400 font-semibold">{character.outfit}</span>, and{' '}
+                                    <span className="text-teal-400 font-semibold">{character.trait}</span>. Their power is{' '}
+                                    <span className="text-yellow-400 font-semibold">{character.superPower}</span>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <React.StrictMode>
+                <CharacterGenerator />
+            </React.StrictMode>
+        );
+    </script>
+</body>
+</html>
