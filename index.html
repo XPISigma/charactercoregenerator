@@ -7,6 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Define CSS variables for glow colors */
+        :root {
+            --purple-glow: 192, 132, 252; /* Corresponds to purple-400 */
+            --teal-glow: 45, 212, 191;    /* Corresponds to teal-400 */
+            --cyan-glow: 34, 211, 238;    /* Corresponds to cyan-400 */
+        }
+
         /* Custom styles for the application */
         body {
             font-family: 'Exo 2', sans-serif;
@@ -54,21 +61,32 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Gradient animation for v3 */
+        /* Gradient animation for v3 with added glow */
         .gradient-text-animated {
             background-size: 400% 100%; /* Make background larger than element to allow movement */
             animation: gradient-shift 8s ease infinite; /* Slow animation speed */
+            /* Initial text shadow for the glow */
+            text-shadow: 0 0 8px rgba(var(--purple-glow), 0.7), 0 0 15px rgba(var(--teal-glow), 0.5);
         }
 
         @keyframes gradient-shift {
             0% {
                 background-position: 0% 50%;
+                text-shadow: 0 0 8px rgba(var(--purple-glow), 0.7), 0 0 15px rgba(var(--teal-glow), 0.5);
             }
-            50% {
+            25% { /* Transition to teal-cyan glow */
+                text-shadow: 0 0 10px rgba(var(--teal-glow), 0.8), 0 0 20px rgba(var(--cyan-glow), 0.6);
+            }
+            50% { /* More intense cyan-teal glow */
                 background-position: 100% 50%;
+                text-shadow: 0 0 12px rgba(var(--cyan-glow), 1), 0 0 25px rgba(var(--teal-glow), 0.8), 0 0 40px rgba(var(--purple-glow), 0.6);
+            }
+            75% { /* Transition back to purple-teal glow */
+                text-shadow: 0 0 10px rgba(var(--purple-glow), 0.8), 0 0 20px rgba(var(--teal-glow), 0.6);
             }
             100% {
                 background-position: 0% 50%;
+                text-shadow: 0 0 8px rgba(var(--purple-glow), 0.7), 0 0 15px rgba(var(--teal-glow), 0.5);
             }
         }
     </style>
@@ -77,13 +95,13 @@
     <div class="text-center mb-8">
         <div class="flex items-center justify-center gap-3 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
-                <path d="M12 3v18M3 12h18M6.34 6.34l11.32 11.32M6.34 17.66L17.66 6.34" />
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             </svg>
             <h1 class="text-4xl md:text-5xl font-bold text-white leading-none">
                 Character Core Generator <span class="bg-gradient-to-r from-purple-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent gradient-text-animated">v3</span>
             </h1>
         </div>
-        <p class="text-slate-400 text-lg">Generate a random character, let's eliminate your art block!</p>
+        <p class="text-slate-400 text-lg">Create unique characters with the click of a button</p>
     </div>
 
     <div class="flex-1 max-w-6xl mx-auto w-full">
@@ -130,7 +148,8 @@
             ],
             bodyType: [
                 'Petite', 'Slim', 'Athletic', 'Curvy', 'Muscular', 'Average', 'Stocky', 'Tall & Lanky',
-                'Voluptuous', 'Toned', 'Chubby', 'Extra Thick', 'Hourglass', 'Lean', 'Curvaceous'
+                'Voluptuous', 'Toned', 'Ectomorph', 'Mesomorph', 'Endomorph', 'Hourglass', 'Pear-shaped',
+                'Apple-shaped', 'Inverted Triangle', 'Rectangle', 'Lean', 'Robust'
             ],
             personality: [
                 'Adventurous', 'Mysterious', 'Cheerful', 'Brooding', 'Confident', 'Shy', 'Witty', 'Calm',
@@ -148,7 +167,29 @@
                 'Bunny Outfit', 'Classic Swimsuit', 'High-waisted Bikini', 'Summer Dress', 'Pinup Lingerie',
                 'French Maid Uniform', 'Retro Diner Uniform', 'Cheerleader Outfit', 'Burlesque Costume',
                 'Sailor Pinup Dress', 'Leopard Print Dress', 'Polka Dot Dress', 'Bombshell Gown',
-                'Tropical Beachwear', 'Roller Derby Outfit'
+                'Tropical Beachwear', 'Roller Derby Outfit',
+                // New outfits added below
+                'Tank Top and Short Shorts', 'Cowgirl Outfit (Hat, Boots, Denim)', 'Tube Top and Mini Skirt',
+                'Leather Jumpsuit', 'Skin-tight Future Suit', 'Plugsuit (Evangelion-inspired)', 'Little Black Dress',
+                'One-Piece Swimsuit (Retro)', 'String Bikini', 'Monokini', 'Sporty Swimsuit', 'Graphic T-shirt and Ripped Jeans',
+                'Crop Top and High-waisted Shorts', 'Fishnet Stockings and Lingerie', 'Corset and Skirt',
+                'Bodycon Dress', 'Sheer Top and Hot Pants', 'Cheeky Bodysuit', 'Lace Teddy', 'Denim Overalls with one strap down',
+                'Schoolgirl Uniform (modern twist)', 'Nurse Uniform (classic pinup style)', 'Police Uniform (flirty version)',
+                'Flight Attendant Uniform (retro)', 'Race Car Driver Suit (form-fitting)', 'Superhero Costume (sleek)',
+                'Mermaid Tail (realistic)', 'Fantasy Rogue Leather Armor', 'Ball Gown (modern cut)', 'Yoga Pants and Sports Bra',
+                'Pajamas (silk slip)', 'Oversized Hoodie and Socks', 'Raincoat and Boots (playful)', 'Artist Smock (paint splattered)',
+                'Chef Coat and Apron (cute)', 'Lab Coat (open, with casual wear underneath)', 'Gym Clothes (stylish)',
+                'Martial Arts Gi (open)', 'Wetsuit (snug)', 'Space Suit (sleek, not bulky)', 'Victorian Swimsuit (modest but charming)',
+                'Flapper Dress (beaded)', 'Zoot Suit (feminine cut)', 'Trench Coat (open, revealing outfit underneath)',
+                'Kimono (open, with modern inner wear)', 'Sarong and Bikini Top', 'Hawaiian Shirt (tied up) and Shorts',
+                'Bandage Dress', 'Sequin Dress', 'Velvet Gown', 'Tweed Skirt Suit', 'Puffer Jacket and Leggings',
+                'Tracksuit (stylish)', 'Sailor Moon inspired outfit', 'Magical Girl uniform', 'Gothic Lolita dress',
+                'Steampunk corset and gear', 'Cyberpunk trench coat and tech-wear', 'Post-apocalyptic scavenger attire',
+                'Medieval peasant dress (cute version)', 'Elven warrior armor', 'Dwarven mining gear (feminine)',
+                'Orcish tribal attire', 'Merfolk scales and top', 'Centaur top and harness', 'Minotaur armor (feminine)',
+                'Gnome adventurer outfit', 'Troll shaman robes', 'Werewolf transformation (partial)', 'Zombie apocalypse survivor gear',
+                'Ghostly ethereal gown', 'Robot plating (humanoid)', 'Alien casual wear', 'Cyborg enhanced suit',
+                'Shifter animalistic features (partial)', 'Gargoyle stone texture dress'
             ],
             trait: [
                 'Always humming', 'Collects vintage coins', 'Speaks in movie quotes', 'Never wears matching socks',
@@ -161,7 +202,9 @@
                 'Always has a snack', 'Writes poetry in secret', 'Can solve a Rubik\'s Cube in under a minute'
             ],
             chestSize: [
-                'AA', 'A', 'B', 'C', 'D', 'DD', 'DDD', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'
+                'AA (Barely there)', 'A (Petite)', 'B (Modest)', 'C (Average)', 'D (Full)', 'DD (Voluptuous)',
+                'DDD (Generous)', 'E (Ample)', 'F (Bountiful)', 'G (Significant)', 'H (Large)', 'I (Very Large)',
+                'J (Huge)', 'K (Massive)', 'L (Immense)', 'M (Grand)', 'N (Colossal)', 'O (Extreme)', 'P (Phenomenal)'
             ],
             age: [
                 '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33',
@@ -227,6 +270,47 @@
                 'Prehensile Hair (Control hair as extra limbs)', 'Regenerative Shedding (Shed skin to heal/transform)',
                 'Vibration Sense (Perceive surroundings through vibrations)', 'Corrosion Touch (Cause rapid decay on contact)',
                 'Aura Reading (Perceive emotional/health auras)'
+            ],
+            pose: [
+                'Contropasto (classic artistic pose)', 'Sitting casually at a cafe table', 'Leaning against a wall, relaxed',
+                'Walking with purpose, mid-stride', 'Taking a sip from a water fountain', 'Running gracefully in a park',
+                'Cuddling on the couch, cozy', 'Getting dressed, mid-motion', 'Posing for a photoshoot, confident',
+                'Posing at the beach, sun-kissed', 'Eating ice cream, enjoying a treat', 'Eating a hot dog, casual bite',
+                'Pinup: classic cheesecake pose', 'Pinup: over-the-shoulder glance', 'Pinup: leaning back, legs crossed',
+                'Pinup: playful wink and hip pop', 'Pinup: lounging on a sofa, alluring', 'Pinup: blowing a kiss',
+                'Pinup: holding a prop (e.g., umbrella, cocktail)', 'Pinup: striking a pose with a vintage car',
+                'Pinup: retro swimsuit stance', 'Pinup: "peek-a-boo" from behind a fan', 'Pinup: reclining on a beach towel',
+                'Pinup: flirty hand on hip', 'Pinup: seductive floor pose', 'Pinup: playful leg kick',
+                'Reading a book, engrossed', 'Playing a musical instrument, focused', 'Working at a desk, concentrated',
+                'Stretching after a workout', 'Meditating peacefully', 'Dancing with joyful abandon',
+                'Holding a pet, affectionate', 'Cooking in the kitchen, mid-stir', 'Gardening, tending to plants',
+                'Taking a selfie, smiling', 'Looking up at the sky, thoughtful', 'Pointing at something, curious',
+                'Shrugging shoulders, indifferent', 'Arms crossed, deep in thought', 'Waving hello enthusiastically',
+                'Giving a thumbs-up, approving', 'Kneeling, examining something closely', 'Jumping for joy, mid-air',
+                'Sprinting, determined expression', 'Floating effortlessly (e.g., in water, zero-g)', 'Crawling stealthily',
+                'Sleeping soundly, curled up', 'Laughing heartily, head thrown back', 'Shouting passionately',
+                'Whispering a secret', 'Flexing muscles, showing strength', 'Balancing on one leg, graceful',
+                'Hugging someone tightly', 'Offering a helping hand', 'Wielding a weapon, ready for action',
+                'Casting a spell, hands glowing', 'Flying, arms outstretched', 'Climbing a rope, focused',
+                'Sitting on a swing, carefree', 'Posing dramatically for a photo', 'Daydreaming, distant gaze',
+                'Skipping happily', 'Building something, concentrated', 'Writing in a journal, reflective',
+                'Listening intently, head tilted', 'Snapping fingers, confident', 'Tapping foot impatiently',
+                'Adjusting glasses, intellectual', 'Biting lip, nervous', 'Fist pump, victorious',
+                'Stretching: reaching for the sky, full extension', 'Stretching: touching toes, graceful bend',
+                'Stretching: arching back, sensual curve', 'Stretching: leg extended, ballet-inspired',
+                'Bent over: looking back, playful glance', 'Bent over: picking something up, focused',
+                'Bent over: hands on knees, catching breath', 'Bent over: leaning on a railing, contemplating',
+                'Flirty: hand on hip, confident smirk', 'Flirty: hair flip, captivating motion',
+                'Flirty: biting lip, suggestive gaze', 'Flirty: winking, mischievous charm',
+                'Flirty: blowing a kiss, alluring gesture', 'Flirty: adjusting clothing, subtly revealing',
+                'Flirty: leaning in close, inviting intimacy', 'Flirty: playful glance over shoulder',
+                'Flirty: sitting with one leg crossed, emphasizing curves', 'Flirty: lounging on a chaise, relaxed and seductive',
+                'Flirty: playfully biting a cherry stem', 'Flirty: holding a fan, peeking over it coyly',
+                'Flirty: adjusting a garter, classic pinup', 'Flirty: winking while holding a cocktail',
+                'Flirty: posing with a prop like a giant lollipop, sweet and sassy', 'Flirty: leaning against a jukebox, retro cool',
+                'Flirty: sitting on a diner counter, legs swinging', 'Flirty: playfully splashing water',
+                'Flirty: lounging on a satin sheet, luxurious', 'Flirty: stretching arms above head, accentuating figure',
+                'Flirty: looking over a fence, curious and inviting', 'Flirty: holding a single flower, innocent allure'
             ]
         };
 
@@ -253,7 +337,8 @@
                 Sparkles: `<path d="M12 3v18M3 12h18M6.34 6.34l11.32 11.32M6.34 17.66L17.66 6.34" />`,
                 Lock: `<rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />`,
                 Unlock: `<rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" />`,
-                Zap: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />`
+                Zap: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />`,
+                Hexagon: `<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>` // Added Hexagon path
             };
 
             const path = svgPaths[iconName];
@@ -276,6 +361,7 @@
             "Species": "PawPrint",
             "Sex": "User",
             "Super Power": "Zap",
+            "Pose": "Sparkles", // Icon for the new Pose category
         };
 
         /**
@@ -321,7 +407,8 @@
          */
         function updateCharacterSummary() {
             const summaryElement = document.getElementById('character-summary');
-            if (summaryElement && character.age && character.sex && character.species && character.skinTone && character.height && character.bodyType && character.personality && character.outfit && character.trait && character.superPower) {
+            // Ensure all character properties are defined before attempting to display them
+            if (summaryElement && character.age && character.sex && character.species && character.skinTone && character.height && character.bodyType && character.personality && character.outfit && character.trait && character.superPower && character.pose) {
                 summaryElement.innerHTML = `
                     <p class="text-lg">
                         Meet your <span class="text-teal-400 font-semibold">${character.age}-year-old ${character.sex} ${character.species}</span> with
@@ -334,6 +421,9 @@
                         <span class="text-cyan-400 font-semibold">${character.outfit}</span>, and
                         <span class="text-teal-400 font-semibold">${character.trait}</span>. Their power is
                         <span class="text-yellow-400 font-semibold">${character.superPower}</span>.
+                    </p>
+                    <p class="text-lg mt-2">
+                        They are currently in a <span class="text-pink-400 font-semibold">${character.pose}</span>.
                     </p>
                 `;
             }
@@ -359,7 +449,8 @@
                 { name: 'skinTone', title: 'Skin Tone' },
                 { name: 'species', title: 'Species' },
                 { name: 'sex', title: 'Sex' },
-                { name: 'superPower', title: 'Super Power' }
+                { name: 'superPower', title: 'Super Power' },
+                { name: 'pose', title: 'Pose' } // Added new 'pose' attribute
             ];
 
             attributes.forEach(attr => {
